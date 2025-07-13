@@ -44,3 +44,11 @@
 
 # local files
 test.cpp
+
+# all files without an extension
+*
+!*/
+!*.cpp
+!*.hpp
+!*.h
+!*.md
