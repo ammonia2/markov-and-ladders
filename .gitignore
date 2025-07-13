@@ -42,9 +42,6 @@
 # debug information files
 *.dwo
 
-# local files
-test.cpp
-
 # all files without an extension
 *
 !*/
@@ -52,3 +49,6 @@ test.cpp
 !*.hpp
 !*.h
 !*.md
+
+# local files
+test.cpp
