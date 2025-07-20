@@ -29,5 +29,6 @@ int main() {
     Board *board = new Board(snakesCount, ladderCount, boardLength, boardHeight);
     board->displayBoard();
 
-    TransitionMatrix matrix(board->getBoard(), boardLength*boardHeight);
+    TransitionMatrix matrix(board->getBoard(), boardLength*boardHeight, boardLength);
+    matrix.calculateProbabilities();
 }

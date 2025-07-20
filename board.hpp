@@ -7,6 +7,7 @@
 #include "ladder.hpp"
 
 class Board {
+    // board is a 2D vector of size length x height
     std::vector<std::vector<BoardEntity*>> board;
     const int snakesCount, ladderCount, boardLength, boardHeight;
     
@@ -50,9 +51,8 @@ class Board {
                 const int currentLinearBlock = i * boardLength + j;
 
                 // no snake/ladder at the starting (0) or ending block (totalBlocks - 1)
-                if (currentLinearBlock == 0 || currentLinearBlock == totalBlocks - 1) {
+                if (currentLinearBlock == 0 || currentLinearBlock == totalBlocks - 1)
                     continue;
-                }
                 
                 // if this position is already occupied (start or end of another snake/ladder)
                 if (occupiedPositions[currentLinearBlock])
@@ -62,9 +62,8 @@ class Board {
                 bool adjacentOccupied = false;
                 if (j > 0 && board[i][j-1] != nullptr) adjacentOccupied = true;
                 if (j < boardLength - 1 && board[i][j+1] != nullptr) adjacentOccupied = true;
-                if (adjacentOccupied) {
+                if (adjacentOccupied)
                     continue;
-                }
 
                 const double snakeP = getSnakeProbability(currentLinearBlock, totalBlocks);
                 const double ladderP = getLadderProbability(currentLinearBlock, totalBlocks);
@@ -147,7 +146,11 @@ class Board {
         }
     }
     
-    std::vector<std::vector<BoardEntity*>> getBoard() {
+    std::vector<std::vector<BoardEntity*>> getBoard() const {
         return board;
+    }
+
+    const int getLength() const {
+        return boardLength;
     }
 };

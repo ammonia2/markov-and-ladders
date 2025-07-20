@@ -10,6 +10,6 @@ class Ladder: public BoardEntity {
     int getStart() const override { return start; }
     int getEnd() const override { return end; }
     int getTargetBlock() override {
-        return start + end;
+        return end;
     }
 };
