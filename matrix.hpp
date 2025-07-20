@@ -1,6 +1,7 @@
 #pragma once
 #include "board.hpp"
 #include <vector>
+#include <fstream>
 
 class TransitionMatrix {
     /* matrix is a 2D vector of size totalStates x totalStates
@@ -61,5 +62,20 @@ class TransitionMatrix {
         for (int i =0; i < totalStates; i++) {
             calculateTransitionProbs(i);
         }
+    }
+
+    void exportToCSV(const std::string& filename) {
+        std::ofstream file(filename);
+
+        for (int i = 0; i<totalStates; i+=1) {
+            for (int j=0; j< totalStates; j+=1) {
+                file << matrix[i][j];
+                if (j < totalStates - 1) 
+                    file << ",";
+            }
+            file<<"\n";
+        }
+        file.close();
+        
     }
 };
