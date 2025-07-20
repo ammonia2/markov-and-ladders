@@ -7,7 +7,7 @@ class BoardEntity {
     virtual int getStart() const = 0;
     virtual int getEnd() const = 0;
     virtual int getTargetBlock() {
-        return NULL;
+        return 0;
     }
     virtual ~BoardEntity() {}
 };
