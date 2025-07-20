@@ -147,4 +147,7 @@ class Board {
         }
     }
     
+    std::vector<std::vector<BoardEntity*>> getBoard() {
+        return board;
+    }
 };

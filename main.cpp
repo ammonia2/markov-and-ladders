@@ -7,6 +7,7 @@
 #include "snake.hpp"
 #include "boardEntity.hpp"
 #include "board.hpp"
+#include "matrix.hpp"
 using namespace std;
 
 int rollDice() {
@@ -27,4 +28,6 @@ int main() {
 
     Board *board = new Board(snakesCount, ladderCount, boardLength, boardHeight);
     board->displayBoard();
+
+    TransitionMatrix matrix(board->getBoard(), boardLength*boardHeight);
 }
