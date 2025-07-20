@@ -139,6 +139,17 @@ void displayBoard(vector<vector<BoardEntity*>> board) {
     }
 }
 
+int rollDice() {
+    // generates a random number in range 1-6
+    static random_device rd; // dont need reinitialisation everytime
+    static mt19937 gen(rd());
+    uniform_int_distribution<> dis(1, 6);
+
+    int number = dis(gen);
+
+    return number;
+}
+
 int main() {
     // declaring constants for initialising a random Snake & Ladder board
     const int snakesCount = 8 + rand() % 4, ladderCount = 8 + rand() % 4;

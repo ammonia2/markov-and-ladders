@@ -9,4 +9,7 @@ class Snake: public BoardEntity {
     Snake(const int s, const int e): start(s), end(e) {}
     int getStart() const override { return start; }
     int getEnd() const override { return end; }
+    int getTargetBlock() override {
+        return start + end;
+    }
 };
