@@ -1,126 +1,89 @@
 #pragma once
-#include "board.hpp"
 #include <vector>
-#include <fstream>
+#include <math.h>
 
-class TransitionMatrix {
-    /* matrix is a 2D vector of size totalStates x totalStates
-     this is a representation of the first order markov model
-     where each state has a probability of transitioning to every
-     other state*/
-    std::vector<std::vector<double>> matrix;
-    std::vector<std::vector<BoardEntity*>> board;
-    int boardLength;
-    int totalStates;
+template <class T>
+class Matrix {
+private:
+    std::vector<std::vector<T>> *data;
+    int rows, cols;
 
-    std::pair<int, int> nonLineariseBlock(int block) {
-        int row = block / boardLength;
-        int col = block % boardLength;
-        
-        return std::make_pair(row, col);
-    }
+public:
+    // Constructors
+    Matrix();
+    Matrix(int rows, int cols);
+    Matrix(int rows, int cols, T defaultValue);
+    Matrix(const std::vector<std::vector<T>>& input);
+    Matrix(const Matrix<T>& other);
 
-    void calculateTransitionProbs(int block) {
-        // for every possible dice state (0 - 6), curr block transition
-        // probabilities are calculated and put into the matrix
-        const double rollProb = 1.0/6.0;
-
-        for (int dice = 1; dice <= 6; dice +=1) {
-            int nextBlock = block + dice;
-            int finalDestination;
-            
-            // CASE 1: overshooting the total states
-            if (nextBlock > totalStates - 1) {
-                finalDestination = block;
-            }
-
-            // CASE 2: winning block
-            else if (nextBlock == totalStates - 1) {
-                finalDestination = nextBlock;
-            }
-
-            else {
-                auto [row, col] = nonLineariseBlock(nextBlock);
-                // CASE 3: Snake / Ladder
-                if (board[row][col] != nullptr)
-                    finalDestination = board[row][col]->getTargetBlock();
-                else // CASE 4: empty
-                    finalDestination = nextBlock;
-            }
-
-            matrix[block][finalDestination] += rollProb;
-        }
-    }
-
-    public:
-    TransitionMatrix(std::vector<std::vector<BoardEntity*>> b, int s, int l)
-        : board(b), totalStates(s), boardLength(l),
-        // initialised with 0
-        matrix(s, std::vector<double>(s, 0)) {}
-
-    void calculateProbabilities() {
-        for (int i =0; i < totalStates; i++) {
-            calculateTransitionProbs(i);
-        }
-    }
-
-    void exportToCSV(const std::string& filename) {
-        std::ofstream file(filename);
-
-        for (int i = 0; i<totalStates; i+=1) {
-            for (int j=0; j< totalStates; j+=1) {
-                file << matrix[i][j];
-                if (j < totalStates - 1) 
-                    file << ",";
-            }
-            file<<"\n";
-        }
-        file.close();
-        
-    }
-
-    // Transient states: from where transitioning to another states is possible
-    // Absorbing state: final state / from where transitioning isn't possible
+    // basic operations
+    Matrix<T>& operator=(const Matrix<T>& other);
+    std::vector<T>& operator[](int row);
+    const std::vector<T>& operator[](int row) const;
     
-    std::vector<std::vector<double>> getQMatrix() {
-        // matrix with all the transient states only so:
-        // size: (totalStates - 1) x (totalStates - 1)
+    // getters
+    int getRows() const;
+    int getCols() const;
+    bool isEmpty() const;
+    bool isSquare() const;
 
-        int transientStates = totalStates - 1;
-        std::vector<std::vector<double>> Q(transientStates, std::vector<double>(transientStates));
+    // arithmetic
+    Matrix<T> operator + (const Matrix<T>& other) const;
+    Matrix<T> operator - (const Matrix<T>& other) const;
+    Matrix<T> operator * (const Matrix<T>& other) const;
+    Matrix<T> operator * (T scalar) const;
 
-        for (int i = 0; i < transientStates; i++) {
-            for (int j = 0; j < transientStates; j++) {
-                Q[i][j] = matrix[i][j];
-            }
-        }
-        
-        return Q;
-    }
-
-    std::vector<std::vector<double>> getRMatrix() {
-        // transient states to absorbing state only
-        // size: (totalStates - 1) x 1
-        int transientStates = totalStates - 1;
-        int absorbingState = totalStates - 1;
-        std::vector<std::vector<double>> R(transientStates, std::vector<double>(1));
-
-        for (int i=0; i< transientStates; i+=1) {
-            R[i][0] = matrix[i][absorbingState];
-        }
-
-        return R;
-    }
-
-    std::vector<std::vector<double>> getIdentityMatrix(int n) {
-        // identity matrix sized n x n
-
-        std::vector<std::vector<double>> I(n, std::vector<double>(n, 0.0));
-        
-        for (int i = 0; i < n; i++) {
-            I[i][i] = 1.0;
-        }
-        
-        return I;
-    }
+    // matrix inversion
+    T determinant() const;
+    Matrix<T> transpose() const;
+    bool isInvertible() const;
+    Matrix<T> inverse() const;
+    
+    // helper functions for inversion algorithms
+    Matrix<T> getMinor(int excludeRow, int excludeCol) const;
+    T cofactor(int row, int col) const;
+    Matrix<T> adjugate() const;
+    
+    // Alternative inversion methods (choose one to implement)
+    Matrix<T> inverseGaussJordan() const;
+    
+    // Utility functions
+    static Matrix<T> identity(int size);
+    void swapRows(int row1, int row2);
+    void multiplyRow(int row, T factor);
+    void addMultipleOfRow(int targetRow, int sourceRow, T factor);
+    
+    // Validation and debugging
+    bool isValidForInversion() const;
+    void print() const;
+    
+    // Numerical stability helpers
+    int findPivot(int col, int startRow) const;
+    bool isNearZero(T value, T epsilon = 1e-10) const;
 };
+
+template <class T>
+Matrix<T>::Matrix() : data(new std::vector<std::vector<T>()), 
+    rows(0), cols(0) {}
+
+template <class T>
+Matrix<T>::Matrix(int rows, int cols):
+    data(new std::vector<std::vector<T>>(rows, std::vector<T>(cols))),
+    rows(rows), cols(cols) {}
+
+template <class T>
+Matrix<T>::Matrix(int rows, int cols, T defaultValue):
+    data(new std::vector<std::vector<T>>(rows, std::vector<T>(cols, defaultValue))),
+    rows(rows), cols(cols) {}
+
+template <class T>
+Matrix<T>::Matrix(const std::vector<std::vector<T>> &input) :
+    data(new std::vector<std::vector<T>>(input)),
+    rows(input.size()),
+    cols(input.empty() ? 0 : input[0].size()) {}
+
+// copy constructor
+template <class T>
+Matrix<T>::Matrix(const Matrix<T> &other):
+    data(new std::vector<std::vector<T>>(*other.data)),
+    rows(other.rows), cols(other.cols) {}

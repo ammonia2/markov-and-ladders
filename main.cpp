@@ -7,7 +7,7 @@
 #include "snake.hpp"
 #include "boardEntity.hpp"
 #include "board.hpp"
-#include "matrix.hpp"
+#include "transitionMatrix.hpp"
 using namespace std;
 
 int rollDice() {
