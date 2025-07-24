@@ -78,4 +78,49 @@ class TransitionMatrix {
         file.close();
         
     }
+
+    // Transient states: from where transitioning to another states is possible
+    // Absorbing state: final state / from where transitioning isn't possible
+    
+    std::vector<std::vector<double>> getQMatrix() {
+        // matrix with all the transient states only so:
+        // size: (totalStates - 1) x (totalStates - 1)
+
+        int transientStates = totalStates - 1;
+        std::vector<std::vector<double>> Q(transientStates, std::vector<double>(transientStates));
+
+        for (int i = 0; i < transientStates; i++) {
+            for (int j = 0; j < transientStates; j++) {
+                Q[i][j] = matrix[i][j];
+            }
+        }
+        
+        return Q;
+    }
+
+    std::vector<std::vector<double>> getRMatrix() {
+        // transient states to absorbing state only
+        // size: (totalStates - 1) x 1
+        int transientStates = totalStates - 1;
+        int absorbingState = totalStates - 1;
+        std::vector<std::vector<double>> R(transientStates, std::vector<double>(1));
+
+        for (int i=0; i< transientStates; i+=1) {
+            R[i][0] = matrix[i][absorbingState];
+        }
+
+        return R;
+    }
+
+    std::vector<std::vector<double>> getIdentityMatrix(int n) {
+        // identity matrix sized n x n
+
+        std::vector<std::vector<double>> I(n, std::vector<double>(n, 0.0));
+        
+        for (int i = 0; i < n; i++) {
+            I[i][i] = 1.0;
+        }
+        
+        return I;
+    }
 };
