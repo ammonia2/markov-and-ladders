@@ -108,19 +108,15 @@ class TransitionMatrix {
         for (int i=0; i< transientStates; i+=1) {
             R[i][0] = matrix[i][absorbingState];
         }
-
         return R;
     }
 
     std::vector<std::vector<double>> getIdentityMatrix(int n) {
         // identity matrix sized n x n
-
         std::vector<std::vector<double>> I(n, std::vector<double>(n, 0.0));
-        
         for (int i = 0; i < n; i++) {
             I[i][i] = 1.0;
         }
-        
         return I;
     }
 
@@ -128,7 +124,6 @@ class TransitionMatrix {
         std::vector<std::vector<double>> Q = getQMatrix();
         int N = Q.size(); // # of rows of Q
         std::vector<std::vector<double>> I = getIdentityMatrix(N);
-
         std::vector<std::vector<double>> IMinusQ(N, std::vector<double>(N));
 
         for (int i=0; i<N; i++) {
