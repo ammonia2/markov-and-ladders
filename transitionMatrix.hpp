@@ -1,7 +1,8 @@
 #pragma once
-#include "board.hpp"
 #include <vector>
 #include <fstream>
+#include "board.hpp"
+#include "matrix.hpp"
 
 class TransitionMatrix {
     /* matrix is a 2D vector of size totalStates x totalStates
@@ -81,12 +82,12 @@ class TransitionMatrix {
     // Transient states: from where transitioning to another states is possible
     // Absorbing state: final state / from where transitioning isn't possible
     
-    std::vector<std::vector<double>> getQMatrix() {
+    Matrix<double> getQMatrix() {
         // matrix with all the transient states only so:
         // size: (totalStates - 1) x (totalStates - 1)
 
         int transientStates = totalStates - 1;
-        std::vector<std::vector<double>> Q(transientStates, std::vector<double>(transientStates));
+        Matrix<double> Q(transientStates, transientStates);
 
         for (int i = 0; i < transientStates; i++) {
             for (int j = 0; j < transientStates; j++) {
@@ -96,12 +97,12 @@ class TransitionMatrix {
         return Q;
     }
 
-    std::vector<std::vector<double>> getRMatrix() {
+    Matrix<double> getRMatrix() {
         // transient states to absorbing state only
         // size: (totalStates - 1) x 1
         int transientStates = totalStates - 1;
         int absorbingState = totalStates - 1;
-        std::vector<std::vector<double>> R(transientStates, std::vector<double>(1));
+        Matrix<double> R(transientStates, 1);
 
         for (int i=0; i< transientStates; i+=1) {
             R[i][0] = matrix[i][absorbingState];
@@ -109,25 +110,12 @@ class TransitionMatrix {
         return R;
     }
 
-    std::vector<std::vector<double>> getIdentityMatrix(int n) {
-        // identity matrix sized n x n
-        std::vector<std::vector<double>> I(n, std::vector<double>(n, 0.0));
-        for (int i = 0; i < n; i++) {
-            I[i][i] = 1.0;
-        }
-        return I;
-    }
+    Matrix<double> getIMinusQ() {
+        Matrix<double> Q = getQMatrix();
+        int N = Q.getRows(); // # of rows of Q
+        Matrix<double> I = Matrix<double>::identity(N);
+        Matrix<double> IMinusQ = I-Q;
 
-    std::vector<std::vector<double>> getIMinuxQ() {
-        std::vector<std::vector<double>> Q = getQMatrix();
-        int N = Q.size(); // # of rows of Q
-        std::vector<std::vector<double>> I = getIdentityMatrix(N);
-        std::vector<std::vector<double>> IMinusQ(N, std::vector<double>(N));
-
-        for (int i=0; i<N; i++) {
-            for (int j = 0; j< N; j++) {
-                IMinusQ[i][j] = I[i][j] - Q[i][j];
-            }
-        }
+        return IMinusQ;
     }
 };
