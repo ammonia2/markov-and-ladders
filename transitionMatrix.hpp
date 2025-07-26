@@ -59,9 +59,8 @@ class TransitionMatrix {
         matrix(s, std::vector<double>(s, 0)) {}
 
     void calculateProbabilities() {
-        for (int i =0; i < totalStates; i++) {
+        for (int i =0; i < totalStates; i++)
             calculateTransitionProbs(i);
-        }
     }
 
     void exportToCSV(const std::string& filename) {
@@ -94,7 +93,6 @@ class TransitionMatrix {
                 Q[i][j] = matrix[i][j];
             }
         }
-        
         return Q;
     }
 

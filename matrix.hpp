@@ -60,7 +60,7 @@ class Matrix {
 
 // CONSTRUCTORS
 template <class T>
-Matrix<T>::Matrix() : data(new std::vector<std::vector<T>()), 
+Matrix<T>::Matrix() : data(new std::vector<std::vector<T>>()), 
     rows(0), cols(0) {}
 
 template <class T>
@@ -168,9 +168,9 @@ Matrix<T> Matrix<T>::operator * (const Matrix& other) const {
         throw std::invalid_argument("Columns of first matrix must be equal to Rows of the second matrix.");
     }
 
-    Matrix<T> modified(*this);
+    Matrix<T> modified(rows, other.cols);
     for (int i = 0; i<rows; i++) {
-        for (int j = 0; j<cols; j++) {
+        for (int j = 0; j< other.cols; j++) {
             T sum = T();
             for (int k = 0; k < cols; k++) {
                 sum += (*this)[i][k] * other[k][j];
@@ -270,7 +270,7 @@ template <class T>
 bool Matrix<T>::isInvertible() const {
     if (!isSquare())
         return false;
-    if (!isEmpty())
+    if (isEmpty())
         return false;
 
     return !isNearZero(determinant());
@@ -278,15 +278,65 @@ bool Matrix<T>::isInvertible() const {
 
 template <class T>
 Matrix<T> Matrix<T>::inverse() const {
-    // Guass Jordan Inverse
+    // Gauss-Jordan Inverse
+    if (!isSquare())
+        throw std::invalid_argument("Inverse is only defined for square matrices.");
+
+    int n = rows;
+    Matrix<T> augmented(n, 2*n);
+    Matrix<T> identity = Matrix<T>::identity(n);
+
+    // left side: original matrix
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            augmented[i][j] = (*this)[i][j];
+        }
+    }
+
+    // augmenting with identity matrix
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            (*augmented.data)[i][j + n] = identity[i][j];
+        }
+    }
+
+    // Gauss-Jordan elimination
+    for (int i = 0; i < n; i++) {
+        int pivotRow = augmented.findPivot(i, i);
+        if (pivotRow == -1 || isNearZero((*augmented.data)[pivotRow][i]))
+            throw std::runtime_error("Matrix is singular and cannot be inverted.");
+
+        // if pivot row not current row
+        if (pivotRow != i)
+            augmented.swapRows(i, pivotRow);
+
+        // nomralising to make pivot val= 1.0
+        T pivotVal = (*augmented.data)[i][i];
+        augmented.multiplyRow(i, 1.0 /pivotVal);
+
+        // modifying other rows
+        for (int k = 0; k <n; k++) {
+            if (k == i) continue;
+            T factor = (*augmented.data)[k][i];
+            augmented.addMultipleOfRow(k, i, -factor);
+        }
+    }
+
+    // right half: inverse
+    Matrix<T> inv(n, n);
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            inv[i][j] = (*augmented.data)[i][j + n];
+
+    return inv;
 }
 
 // INVERSE UTILITY
 template <class T>
 Matrix<T> Matrix<T>::identity(int size) {
-    Matrix<T> I(size, size);
+    Matrix<T> I(size, size, T(0));
     for (int i = 0; i < size; i++)
-        I[i][i] = 1.0;
+        I[i][i] = T(1);
     
     return I;
 }
@@ -320,6 +370,20 @@ void Matrix<T>::addMultipleOfRow(int targetRow, int sourceRow, T factor) {
 template <class T>
 bool Matrix<T>::isNearZero(T value, T epsilon) const {
     return std::abs(value) < epsilon;
+}
+
+template <class T>
+int Matrix<T>::findPivot(int col, int startRow) const {
+    int pivotRow = -1;
+    T maxVal = 0;
+    for (int i = startRow; i < rows; ++i) {
+        T val = std::abs((*data)[i][col]);
+        if (val > maxVal) {
+            maxVal = val;
+            pivotRow = i;
+        }
+    }
+    return pivotRow;
 }
 
 // DEBUGGING
