@@ -3,8 +3,6 @@
 #include <random>
 #include <vector>
 
-#include "ladder.hpp"
-#include "snake.hpp"
 #include "boardEntity.hpp"
 #include "board.hpp"
 #include "transitionMatrix.hpp"
@@ -12,7 +10,7 @@ using namespace std;
 
 int rollDice() {
     // generates a random number in range 1-6
-    static random_device rd; // dont need reinitialisation everytime
+    static random_device rd; // don't need reinitialisation everytime
     static mt19937 gen(rd());
     uniform_int_distribution<> dis(1, 6);
 
@@ -29,7 +27,17 @@ int main() {
     Board *board = new Board(snakesCount, ladderCount, boardLength, boardHeight);
     board->displayBoard();
 
-    TransitionMatrix matrix(board->getBoard(), boardLength*boardHeight, boardLength);
-    matrix.calculateProbabilities();
+    TransitionMatrix pMatrix(board->getBoard(), boardLength*boardHeight, boardLength);
+    pMatrix.calculateProbabilities();
     // matrix.exportToCSV("dataset.csv");
+
+    Matrix<double> fundamentalMatrix = pMatrix.getFundamentalMatrix();
+
+    // ANALYSIS: expected total moves to win from starting position
+    int numStates = fundamentalMatrix.getRows();
+    Matrix<double> ones(numStates, 1, 1.0);
+    Matrix<double> expectedMoves = fundamentalMatrix* ones;
+
+    double avgGameLength = expectedMoves[0][0];
+    cout << "Expected moves from start: " << avgGameLength << endl;
 }
