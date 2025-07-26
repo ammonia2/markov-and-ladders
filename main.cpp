@@ -31,5 +31,5 @@ int main() {
 
     TransitionMatrix matrix(board->getBoard(), boardLength*boardHeight, boardLength);
     matrix.calculateProbabilities();
-    matrix.exportToCSV("dataset.csv");
+    // matrix.exportToCSV("dataset.csv");
 }

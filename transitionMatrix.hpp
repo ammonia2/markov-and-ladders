@@ -110,12 +110,12 @@ class TransitionMatrix {
         return R;
     }
 
-    Matrix<double> getIMinusQ() {
+    Matrix<double> getFundamentalMatrix() {
         Matrix<double> Q = getQMatrix();
         int N = Q.getRows(); // # of rows of Q
         Matrix<double> I = Matrix<double>::identity(N);
         Matrix<double> IMinusQ = I-Q;
 
-        return IMinusQ;
+        return IMinusQ.inverse();
     }
 };
