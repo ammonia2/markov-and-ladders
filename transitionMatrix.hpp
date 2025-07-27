@@ -79,6 +79,10 @@ class TransitionMatrix {
         
     }
 
+    Matrix<double> getTransitionMatrix() {
+        return Matrix<double>(matrix);
+    }
+
     // Transient states: from where transitioning to another states is possible
     // Absorbing state: final state / from where transitioning isn't possible
     
