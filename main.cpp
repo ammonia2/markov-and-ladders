@@ -55,7 +55,7 @@ int main() {
 
         Matrix<double> currentDistribution = initialDistribution;
         for (int turn = 0; turn < k; turn++)
-            currentDistribution = P * currentDistribution;
+            currentDistribution = P.transpose() * currentDistribution;
 
         double winProbability = currentDistribution[totalStates -1][0];
         cout<<"Probability of winning: "<<winProbability<<endl;
