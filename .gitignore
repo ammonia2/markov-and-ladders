@@ -52,3 +52,6 @@
 
 # local files
 test.cpp
+
+# editor config folders
+.vscode

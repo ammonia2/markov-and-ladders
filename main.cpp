@@ -6,6 +6,9 @@
 #include "boardEntity.hpp"
 #include "board.hpp"
 #include "transitionMatrix.hpp"
+#include "matplotlibcpp.h"
+
+namespace plt = matplotlibcpp;
 using namespace std;
 
 int rollDice() {
@@ -34,13 +37,29 @@ int main() {
 
     Matrix<double> fundamentalMatrix = pMatrix.getFundamentalMatrix();
 
-    // ANALYSIS: expected total moves to win from starting position
+    // ANALYSIS: expected total moves to win from each block
     int numStates = fundamentalMatrix.getRows();
     Matrix<double> ones(numStates, 1, 1.0);
-    Matrix<double> expectedMoves = fundamentalMatrix* ones;
+    Matrix<double> expectedMoves = fundamentalMatrix * ones;
 
-    double avgGameLength = expectedMoves[0][0];
-    cout<<"Expected moves to win from start: "<<avgGameLength<<endl;
+    // plotting
+    vector<double> blocks;
+    vector<double> expectedMovesVec;
+    for (int i = 0; i < numStates; ++i) {
+        blocks.push_back(i + 1); // Block numbers (1-indexed)
+        expectedMovesVec.push_back(expectedMoves[i][0]);
+    }
+
+    plt::figure();
+    plt::plot(blocks, expectedMovesVec);
+    plt::title("Expected Moves to Win from Each Block");
+    plt::xlabel("Board Block");
+    plt::ylabel("Expected Moves");
+    plt::grid(true);
+    plt::show();
+
+    // double avgGameLength = expectedMoves[0][0];
+    // cout << "Expected moves to win from start: " << avgGameLength << endl;
 
     // ANALYSIS: probability of being on each square after K turns
     Matrix<double> P = pMatrix.getTransitionMatrix();
@@ -48,17 +67,19 @@ int main() {
     Matrix<double> initialDistribution (totalStates, 1, 0.0);
     initialDistribution[0][0] = 1.0; // always starts from square 1 on the board
 
-    vector<int> steps = {1, 5, 10, 20, 50, 100};
-    
+    vector<double> steps = {1, 5, 10, 20, 50, 100};
+    vector<double> winningProbs;
+
     for (int k: steps) {
-        cout<<"\nAfter "<<k<<" turns"<<endl;
+        // cout<<"\nAfter "<<k<<" turns"<<endl;
 
         Matrix<double> currentDistribution = initialDistribution;
         for (int turn = 0; turn < k; turn++)
             currentDistribution = P.transpose() * currentDistribution;
 
         double winProbability = currentDistribution[totalStates -1][0];
-        cout<<"Probability of winning: "<<winProbability<<endl;
+        winningProbs.push_back(winProbability);
+        // cout<<"Probability of winning: "<<winProbability<<endl;
         
         // most likely position (excluding absorbing state)
         int mostLikelyPos = 0;
@@ -71,6 +92,15 @@ int main() {
             }
         }
 
-        cout<<"Most likely position: "<<mostLikelyPos + 1<<" (probability: "<<maxProb<<")"<<endl;
+        // cout<<"Most likely position: "<<mostLikelyPos + 1<<" (probability: "<<maxProb<<")"<<endl;
     }
+
+    plt::figure();
+    plt::plot(steps, winningProbs);
+    plt::title("Winning Probability after steps");
+    plt::xlabel("Number of Steps");
+    plt::ylabel("Winning Probability");
+    plt::grid(true);
+    plt::show();
+
 }
