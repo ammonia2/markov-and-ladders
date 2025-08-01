@@ -67,7 +67,11 @@ int main() {
     Matrix<double> initialDistribution (totalStates, 1, 0.0);
     initialDistribution[0][0] = 1.0; // always starts from square 1 on the board
 
-    vector<double> steps = {1, 5, 10, 20, 50, 100};
+    vector<double> steps;
+    for (int i = 0; i < 100; i++) {
+        steps.push_back(static_cast<double>(i));
+    }
+
     vector<double> winningProbs;
 
     for (int k: steps) {
